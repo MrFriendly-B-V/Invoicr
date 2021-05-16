@@ -12,13 +12,13 @@ pub struct AppData {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Config {
-    mysql_host:         String,
-    mysql_database:     String,
-    mysql_username:     String,
-    mysql_password:     String,
-    espocrm_host:       String,
-    espocrm_api_key:    String,
-    espocrm_secret_key: String
+    pub mysql_host:         String,
+    pub mysql_database:     String,
+    pub mysql_username:     String,
+    pub mysql_password:     String,
+    pub espocrm_host:       String,
+    pub espocrm_api_key:    String,
+    pub espocrm_secret_key: String
 }
 
 impl Default for Config {
@@ -157,6 +157,8 @@ impl AppData {
 
         let mut required_tables_map = HashMap::new();
         required_tables_map.insert("products".to_string(), false);
+        required_tables_map.insert("invoices".to_string(), false);
+        required_tables_map.insert("quotes".to_string(), false);
 
         for row in sql_get_tables {
             let table_name = row.get::<String, &str>("table_name").expect("Unable to get table_name from row.");
@@ -179,5 +181,11 @@ impl AppData {
 
         conn.query::<usize, &str>("CREATE TABLE `products` (`id` varchar(32) NOT NULL, `name` varchar(255) NOT NULL, `description` text NOT NULL, `price` double NOT NULL, PRIMARY KEY (`id`), KEY `name` (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").expect("Unable to create table 'products'");
         println!("Created table 'products'");
+
+        conn.query::<usize, &str>("CREATE TABLE `invoices` (`id` int(11) NOT NULL, `receiver` varchar(255) NOT NULL, `is_paid` tinyint(1) NOT NULL, PRIMARY KEY (`id`), KEY `receiver` (`receiver`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").expect("Unable to create table 'invoices'");
+        println!("Created table 'invoices'");
+
+        conn.query::<usize, &str>("CREATE TABLE `quotes` (`id` int(11) NOT NULL, `invoice_id` varchar(32) DEFAULT NULL, `receiver` varchar(255) NOT NULL, `valid_until` bigint(20) NOT NULL, PRIMARY KEY (`id`), KEY `invoice_id` (`invoice_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").expect("Unable to create table 'quotes'");
+        println!("Created table 'quotes'");
     }
 }

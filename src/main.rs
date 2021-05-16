@@ -1,5 +1,6 @@
 mod appdata;
 mod endpoints;
+mod pdf;
 
 use actix_web::{HttpServer, App};
 use crate::appdata::{Config, AppData};
@@ -22,6 +23,10 @@ pub async fn main() -> std::io::Result<()> {
             .service(crate::endpoints::products::get::get_products)
             .service(crate::endpoints::products::add::add_product)
             .service(crate::endpoints::products::del::del_product)
+            .service(crate::endpoints::persons::get::get_contacts)
+            .service(crate::endpoints::pdf::invoice::create_invoice)
+            .service(crate::endpoints::history::invoice::get_invoice_history)
+            .service(crate::endpoints::history::quote::get_quote_history)
     })
     .bind("0.0.0.0:8080")?
     .run()

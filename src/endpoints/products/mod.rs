@@ -6,8 +6,8 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Product {
-    id:             Option<String>,
-    name:           String,
-    description:    String,
-    price:          f64
+    pub id:             Option<String>,
+    pub name:           String,
+    pub description:    String,
+    pub price:          f64
 }
