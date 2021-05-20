@@ -2,9 +2,11 @@ mod appdata;
 mod endpoints;
 mod apis;
 mod threads;
+mod authenticator;
 
-use actix_web::{HttpServer, App};
 use crate::appdata::{Config, AppData};
+use actix_web::{HttpServer, App};
+use actix_web_grants::GrantsMiddleware;
 
 type Result<T> = std::result::Result<T, String>;
 
@@ -20,15 +22,24 @@ pub async fn main() -> std::io::Result<()> {
 
     println!("Starting on port 8080");
     HttpServer::new(move || {
-        let cors = actix_cors::Cors::permissive();
+        let cors = actix_cors::Cors::default()
+            .allow_any_header()
+            .allowed_methods(vec!["GET", "POST"])
+            .allowed_origin("http://localhost")
+            .allowed_origin("https://invoicr.intern.mrfriendly.nl");
+
+        let auth = GrantsMiddleware::with_extractor(authenticator::check_permission);
+
         App::new()
             .wrap(cors)
+            .wrap(auth)
             .data(appdata.clone())
             .service(crate::endpoints::products::get::get_products)
             .service(crate::endpoints::products::add::add_product)
             .service(crate::endpoints::products::del::del_product)
             .service(crate::endpoints::persons::get::get_contacts)
             .service(crate::endpoints::pdf::invoice::create_invoice)
+            .service(crate::endpoints::pdf::quote::create_quote)
             .service(crate::endpoints::history::invoice::get_invoice_history)
             .service(crate::endpoints::history::quote::get_quote_history)
     })

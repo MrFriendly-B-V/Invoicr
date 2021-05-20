@@ -1,4 +1,5 @@
 use actix_web::{post, web, HttpResponse};
+use actix_web_grants::proc_macro::has_permissions;
 use crate::AppData;
 use crate::apis::pdf::{PdfCommonPayload, generate_invoice, PdfGenerationResponse};
 use mysql::prelude::Queryable;
@@ -6,6 +7,7 @@ use mysql::{Params, params, Row};
 use rand::Rng;
 
 #[post("/pdf/invoice")]
+#[has_permissions("INVOICE_CREATE")]
 pub async fn create_invoice(data: web::Data<AppData>, payload: web::Json<PdfCommonPayload>) -> HttpResponse {
     let mut conn = match data.pool.get_conn() {
         Ok(conn) => conn,
@@ -27,7 +29,7 @@ pub async fn create_invoice(data: web::Data<AppData>, payload: web::Json<PdfComm
     let invoice_ids = {
         let mut invoice_ids = Vec::with_capacity(sql_get_invoice_ids.len());
         for row in sql_get_invoice_ids {
-            let id = row.get::<String, &str>("id").unwrap();
+            let id = row.get::<i64, &str>("id").unwrap();
             invoice_ids.push(id);
         }
 
@@ -65,11 +67,12 @@ pub async fn create_invoice(data: web::Data<AppData>, payload: web::Json<PdfComm
     for row in payload.rows.iter() {
         let id: String = rand::thread_rng().sample_iter(rand::distributions::Alphanumeric).take(32).map(char::from).collect();
         let sql_create_item_row = conn.exec::<usize, &str, Params>("INSERT INTO itemrows \
-            (id, parent_id, comment, name, description, discount_perc, vat_perc, price, quantity) \
-            VALUES (:id, :parent_id, :comment, :name, :description, :discount_perc, :vat_perc, :price, :quantity)", params! {
+            (id, parent_id, parent_type, comment, name, description, discount_perc, vat_perc, price, quantity) \
+            VALUES (:id, :parent_id, :parent_type, :comment, :name, :description, :discount_perc, :vat_perc, :price, :quantity)", params! {
 
             "id" => id,
             "parent_id" => &payload.id,
+            "parent_type" => "invoices",
             "comment" => &row.comment,
             "name" => &row.name,
             "description" => &row.description,

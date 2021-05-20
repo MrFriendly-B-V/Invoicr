@@ -10,7 +10,7 @@ type HmacSha256 = Hmac<Sha256>;
 pub struct PdfCommonPayload {
     pub template_name:  String,
     pub language:       String,
-    pub id:             String,
+    pub id:             i64,
     pub attention_of:   Option<String>,
     pub receiver:       String,
     pub reference:      String,
@@ -25,10 +25,10 @@ pub struct PdfCommonPayload {
 #[serde(rename_all = "camelCase")]
 pub struct PdfQuotePayload {
     #[serde(flatten)]
-    common:                 PdfCommonPayload,
-    quote_topic:            String,
-    quote_contact_person:   String,
-    debit_id:               String
+    pub common:                 PdfCommonPayload,
+    pub quote_topic:            String,
+    pub quote_contact_person:   String,
+    pub debit_id:               String
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -91,7 +91,7 @@ pub async fn generate_invoice(config: &Config, payload: &PdfCommonPayload) -> cr
     Ok(id)
 }
 
-pub async fn generate_quote(config: &Config, payload: PdfQuotePayload) -> crate::Result<String> {
+pub async fn generate_quote(config: &Config, payload: &PdfQuotePayload) -> crate::Result<String> {
     let rt = tokio::runtime::Runtime::new().unwrap();
     let _guard = rt.enter();
     const PATH: &str = "generate/quote";
@@ -143,8 +143,6 @@ fn get_hmac<A, B>(config: &Config, method: A, path: B) -> crate::Result<String> 
         ":",
         base64::encode(mac_result)
     );
-
-    println!("{}", hmac_string);
 
     Ok(hmac_string)
 }

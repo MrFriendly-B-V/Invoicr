@@ -213,10 +213,10 @@ impl AppData {
         conn.query::<usize, &str>("CREATE TABLE `products` (`id` varchar(32) NOT NULL, `name` varchar(255) NOT NULL, `description` text NOT NULL, `price` double NOT NULL, PRIMARY KEY (`id`), KEY `name` (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").expect("Unable to create table 'products'");
         println!("Created table 'products'");
 
-        conn.query::<usize, &str>("CREATE TABLE `invoices` (`id` int(11) NOT NULL, `receiver` varchar(255) NOT NULL, `is_paid` tinyint(1) NOT NULL, PRIMARY KEY (`id`), KEY `receiver` (`receiver`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").expect("Unable to create table 'invoices'");
+        conn.query::<usize, &str>("invoices | CREATE TABLE `invoices` ( `id` bigint(64) NOT NULL, `template_name` varchar(255) NOT NULL, `language` varchar(255) NOT NULL, `attention_of` varchar(255) DEFAULT NULL, `receiver` varchar(255) NOT NULL, `reference` text NOT NULL, `notes` text DEFAULT NULL, `expiry_date` bigint(20) NOT NULL, `creation_date` bigint(20) NOT NULL, `city` varchar(255) NOT NULL, `country` varchar(255) NOT NULL, `postal_code` varchar(255) NOT NULL, `street` varchar(255) NOT NULL, PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").expect("Unable to create table 'invoices'");
         println!("Created table 'invoices'");
 
-        conn.query::<usize, &str>("CREATE TABLE `quotes` (`id` int(11) NOT NULL, `invoice_id` varchar(32) DEFAULT NULL, `receiver` varchar(255) NOT NULL, `valid_until` bigint(20) NOT NULL, PRIMARY KEY (`id`), KEY `invoice_id` (`invoice_id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").expect("Unable to create table 'quotes'");
+        conn.query::<usize, &str>("quotes | CREATE TABLE `quotes` (  `id` bigint(64) NOT NULL,  `template_name` varchar(255) NOT NULL,  `language` varchar(255) NOT NULL,  `attention_of` varchar(255) DEFAULT NULL,  `receiver` varchar(255) NOT NULL,  `reference` text NOT NULL,  `notes` text DEFAULT NULL,  `expiry_date` bigint(20) NOT NULL,  `creation_date` bigint(20) NOT NULL,  `city` varchar(255) NOT NULL,  `country` varchar(255) NOT NULL,  `postal_code` varchar(255) NOT NULL,  `street` varchar(255) NOT NULL,  `quote_topic` varchar(255) NOT NULL,  `quote_contact_person` varchar(255) NOT NULL,  `debit_id` varchar(255) NOT NULL,  PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4").expect("Unable to create table 'quotes'");
         println!("Created table 'quotes'");
     }
 }

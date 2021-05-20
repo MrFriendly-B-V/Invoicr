@@ -1,4 +1,5 @@
 use actix_web::{web, get, HttpResponse};
+use actix_web_grants::proc_macro::has_permissions;
 use serde::Serialize;
 use crate::appdata::AppData;
 use crate::threads::espocrm::Communication;
@@ -20,6 +21,7 @@ pub struct Contact {
 }
 
 #[get("/persons/get")]
+#[has_permissions("PERSONS_READ")]
 pub async fn get_contacts(data: web::Data<AppData>) -> HttpResponse {
     let contacts = Communication::query_contact(&data.espocrm_data);
     let accounts = Communication::query_account(&data.espocrm_data);
