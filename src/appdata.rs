@@ -3,11 +3,14 @@ use serde::{Serialize, Deserialize};
 use mysql::prelude::Queryable;
 use mysql::{Row, Params, params};
 use std::collections::HashMap;
+use std::sync::mpsc::Sender;
+use crate::threads::espocrm::Communication;
 
 #[derive(Clone)]
 pub struct AppData {
-    pub config: Config,
-    pub pool:   mysql::Pool
+    pub config:         Config,
+    pub pool:           mysql::Pool,
+    pub espocrm_data:   Sender<Communication>
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -18,7 +21,10 @@ pub struct Config {
     pub mysql_password:     String,
     pub espocrm_host:       String,
     pub espocrm_api_key:    String,
-    pub espocrm_secret_key: String
+    pub espocrm_secret_key: String,
+    pub invoicr_pdf_host:   String,
+    pub invoicr_pdf_key:    String,
+    pub invoicr_pdf_secret: String
 }
 
 impl Default for Config {
@@ -30,7 +36,10 @@ impl Default for Config {
             mysql_password: "a_super_secure_password".to_string(),
             espocrm_host: "espocrm.example.com".to_string(),
             espocrm_api_key: "espocrm_api_key".to_string(),
-            espocrm_secret_key: "espocrm_secret_key".to_string()
+            espocrm_secret_key: "espocrm_secret_key".to_string(),
+            invoicr_pdf_host: "invoicr_pdf_host".to_string(),
+            invoicr_pdf_key: "your_invoicr_pdf_key".to_string(),
+            invoicr_pdf_secret: "your_invoicr_pdf_secret".to_string()
         }
     }
 }
@@ -116,6 +125,24 @@ impl Config {
             std::process::exit(1);
         }
 
+        let invoicr_pdf_host = var("INVOICR_PDF_HOST");
+        if invoicr_pdf_host.is_err() {
+            eprintln!("Required environmental variable 'INVOICR_PDF_HOST' is not set. Exiting.");
+            std::process::exit(1);
+        }
+
+        let invoicr_pdf_key = var("INVOICR_PDF_KEY");
+        if invoicr_pdf_key.is_err() {
+            eprintln!("Required environmental variable 'INVOICR_PDF_KEY' is not set. Exiting.");
+            std::process::exit(1);
+        }
+
+        let invoicr_pdf_secret = var("INVOICR_PDF_SECRET");
+        if invoicr_pdf_secret.is_err() {
+            eprintln!("Required environmental variable 'INVOICR_PDF_SECRET' is not set. Exiting.");
+            std::process::exit(1);
+        }
+
         Self {
             mysql_host: mysql_host.unwrap(),
             mysql_database: mysql_database.unwrap(),
@@ -123,7 +150,10 @@ impl Config {
             mysql_password: mysql_password.unwrap(),
             espocrm_host: espocrm_host.unwrap(),
             espocrm_api_key: espocrm_api_key.unwrap(),
-            espocrm_secret_key: espocrm_secret_key.unwrap()
+            espocrm_secret_key: espocrm_secret_key.unwrap(),
+            invoicr_pdf_host: invoicr_pdf_host.unwrap(),
+            invoicr_pdf_key: invoicr_pdf_key.unwrap(),
+            invoicr_pdf_secret: invoicr_pdf_secret.unwrap()
         }
     }
 }
@@ -145,7 +175,8 @@ impl AppData {
 
         Self {
             config: config.clone(),
-            pool: pool.unwrap()
+            pool: pool.unwrap(),
+            espocrm_data: crate::threads::espocrm::start(config.clone()).unwrap()
         }
     }
 

@@ -1,9 +1,12 @@
 mod appdata;
 mod endpoints;
-mod pdf;
+mod apis;
+mod threads;
 
 use actix_web::{HttpServer, App};
 use crate::appdata::{Config, AppData};
+
+type Result<T> = std::result::Result<T, String>;
 
 #[actix_web::main]
 pub async fn main() -> std::io::Result<()> {
@@ -15,6 +18,7 @@ pub async fn main() -> std::io::Result<()> {
         appdata.init_db();
     }
 
+    println!("Starting on port 8080");
     HttpServer::new(move || {
         let cors = actix_cors::Cors::permissive();
         App::new()
