@@ -42,6 +42,7 @@ pub async fn main() -> std::io::Result<()> {
             .service(crate::endpoints::pdf::quote::create_quote)
             .service(crate::endpoints::history::invoice::get_invoice_history)
             .service(crate::endpoints::history::quote::get_quote_history)
+            .service(crate::endpoints::ids::quote::get_quite_id)
     })
     .bind("0.0.0.0:8080")?
     .run()

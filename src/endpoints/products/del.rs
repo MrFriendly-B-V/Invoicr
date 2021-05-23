@@ -1,4 +1,5 @@
 use actix_web::{post, HttpResponse, web};
+use actix_web_grants::proc_macro::has_permissions;
 use serde::{Serialize, Deserialize};
 use mysql::prelude::Queryable;
 use mysql::{Row, Params, params};
@@ -15,6 +16,7 @@ pub struct Response {
 }
 
 #[post("/products/del")]
+#[has_permissions("PRODUCTS_WRITE")]
 pub async fn del_product(data: web::Data<AppData>, request: web::Json<Request>) -> HttpResponse {
     let conn = data.pool.get_conn();
     if conn.is_err() {

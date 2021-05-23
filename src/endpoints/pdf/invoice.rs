@@ -67,10 +67,11 @@ pub async fn create_invoice(data: web::Data<AppData>, payload: web::Json<PdfComm
     for row in payload.rows.iter() {
         let id: String = rand::thread_rng().sample_iter(rand::distributions::Alphanumeric).take(32).map(char::from).collect();
         let sql_create_item_row = conn.exec::<usize, &str, Params>("INSERT INTO itemrows \
-            (id, parent_id, parent_type, comment, name, description, discount_perc, vat_perc, price, quantity) \
-            VALUES (:id, :parent_id, :parent_type, :comment, :name, :description, :discount_perc, :vat_perc, :price, :quantity)", params! {
+            (id, product_id, parent_id, parent_type, comment, name, description, discount_perc, vat_perc, price, quantity) \
+            VALUES (:id, :product_id, :parent_id, :parent_type, :comment, :name, :description, :discount_perc, :vat_perc, :price, :quantity)", params! {
 
             "id" => id,
+            "product_id" => &row.id,
             "parent_id" => &payload.id,
             "parent_type" => "invoices",
             "comment" => &row.comment,

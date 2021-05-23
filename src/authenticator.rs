@@ -6,7 +6,11 @@ pub async fn check_permission(_req: &ServiceRequest) -> Result<Vec<String>, acti
     //Stub code for now
     Ok(vec![
         "INVOICE_CREATE".to_string(),
+        "INVOICE_READ".to_string(),
         "QUOTE_CREATE".to_string(),
-        "PERSONS_READ".to_string()
+        "QUOTE_READ".to_string(),
+        "PERSONS_READ".to_string(),
+        "PRODUCTS_READ".to_string(),
+        "PRODUCTS_WRITE".to_string()
     ])
 }

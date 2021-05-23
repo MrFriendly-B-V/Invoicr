@@ -1,4 +1,5 @@
 use actix_web::{HttpResponse, web, get};
+use actix_web_grants::proc_macro::has_permissions;
 use serde::Serialize;
 use mysql::prelude::Queryable;
 use mysql::Row;
@@ -11,6 +12,7 @@ pub struct Response {
 }
 
 #[get("/products/get")]
+#[has_permissions("PRODUCTS_READ")]
 pub async fn get_products(data: web::Data<AppData>) -> HttpResponse {
     let conn = data.pool.get_conn();
     if conn.is_err() {

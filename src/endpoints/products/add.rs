@@ -1,4 +1,5 @@
 use actix_web::{HttpResponse, web, post};
+use actix_web_grants::proc_macro::has_permissions;
 use serde::{Serialize, Deserialize};
 use mysql::prelude::Queryable;
 use mysql::{Row, Params, params};
@@ -19,6 +20,7 @@ pub struct Response {
 }
 
 #[post("/products/add")]
+#[has_permissions("PRODUCTS_WRITE")]
 pub async fn add_product(data: web::Data<AppData>, request: web::Json<Request>) -> HttpResponse {
     let conn = data.pool.get_conn();
     if conn.is_err() {
