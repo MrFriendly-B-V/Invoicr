@@ -20,14 +20,18 @@ pub async fn main() -> std::io::Result<()> {
         appdata.init_db();
     }
 
-    println!("Starting on port 8080");
+    println!("Starting on port 8090");
     HttpServer::new(move || {
-        let cors = actix_cors::Cors::default()
+        let _cors = actix_cors::Cors::default()
             .allow_any_header()
             .allowed_methods(vec!["GET", "POST"])
             .allowed_origin("http://localhost")
             .allowed_origin("https://invoicr.intern.mrfriendly.nl");
 
+        let cors = actix_cors::Cors::permissive()
+            .allow_any_origin()
+            .allow_any_header()
+            .allow_any_method();
         let auth = GrantsMiddleware::with_extractor(authenticator::check_permission);
 
         App::new()
@@ -44,7 +48,7 @@ pub async fn main() -> std::io::Result<()> {
             .service(crate::endpoints::history::quote::get_quote_history)
             .service(crate::endpoints::ids::quote::get_quite_id)
     })
-    .bind("0.0.0.0:8080")?
+    .bind("0.0.0.0:8090")?
     .run()
     .await
 }
